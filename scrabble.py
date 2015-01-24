@@ -90,13 +90,13 @@ class Zasobnik:
             yi = self.y
             self.zasobnik[i].vykresli(g, xi, yi)
 
-    def je_klik(self, x, y):
+    def je_vnutri(self, x, y):
         sirka = len(self.zasobnik) * Program.ROZMER_POLICKA
         vyska = Program.ROZMER_POLICKA
         return self.x <= x <= self.x + sirka and self.y <= y <= self.y + vyska
 
     def aky_utvar(self, x, y):
-        if not self.je_klik(x, y):
+        if not self.je_vnutri(x, y):
             return None
 
         relativne_x = x - self.x
@@ -165,13 +165,13 @@ class Plocha:
                 yi = self.y + stlpec*Program.ROZMER_POLICKA
                 self.policka[riadok][stlpec].vykresli(g, xi, yi)
 
-    def je_klik(self, x, y):
+    def je_vnutri(self, x, y):
         sirka = len(self.policka[0]) * Program.ROZMER_POLICKA
         vyska = len(self.policka) *Program.ROZMER_POLICKA
         return self.x <= x <= self.x + sirka and self.y <= y <= self.y + vyska
 
     def aky_utvar(self, x, y):
-        if not self.je_klik(x, y):
+        if not self.je_vnutri(x, y):
             return None
 
         relativne_x = x - self.x
@@ -279,7 +279,7 @@ class Program:
                       
      
     def udalost_kliknutie(self, event):
-        print(self.zasobnik.je_klik(event.x, event.y))
+        print(self.zasobnik.je_vnutri(event.x, event.y))
         print(self.zasobnik.aky_utvar(event.x, event.y))
         print(event.x, event.y)
         self.dragovane = self.zasobnik.aky_utvar(event.x, event.y)
