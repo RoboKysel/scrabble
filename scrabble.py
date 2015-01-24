@@ -1,6 +1,5 @@
 import tkinter, random
 
-
 class Pismeno:
     
     def __init__(self, pismeno, hodnota):
@@ -90,6 +89,20 @@ class Zasobnik:
             xi = self.x + i*Program.ROZMER_POLICKA
             yi = self.y
             self.zasobnik[i].vykresli(g, xi, yi)
+
+    def je_klik(self, x, y):
+        sirka = len(self.zasobnik) * Program.ROZMER_POLICKA
+        vyska = Program.ROZMER_POLICKA
+        return self.x <= x <= self.x + sirka and self.y <= y <= self.y + vyska
+
+    def aky_utvar(self, x, y):
+        if not self.je_klik(x, y):
+            return None
+
+        relativne_x = x - self.x
+        index = relativne_x // Program.ROZMER_POLICKA
+        pismeno = self.zasobnik[index]
+        return pismeno
            
 
 class Plocha:
@@ -145,13 +158,26 @@ class Plocha:
                     novy_riadok.append(nove_policko)
                 self.policka.append(novy_riadok)
 
- 
     def vykresli(self, g):
        for riadok in range(len(self.policka)):     
             for stlpec in range(len(self.policka[riadok])):
                 xi = self.x + riadok*Program.ROZMER_POLICKA
                 yi = self.y + stlpec*Program.ROZMER_POLICKA
                 self.policka[riadok][stlpec].vykresli(g, xi, yi)
+
+    def je_klik(self, x, y):
+        sirka = len(self.policka[0]) * Program.ROZMER_POLICKA
+        vyska = len(self.policka) *Program.ROZMER_POLICKA
+        return self.x <= x <= self.x + sirka and self.y <= y <= self.y + vyska
+
+    def aky_utvar(self, x, y):
+        if not self.je_klik(x, y):
+            return None
+
+        relativne_x = x - self.x
+        index = relativne_x // Program.ROZMER_POLICKA
+        pismeno = self.zasobnik[index]
+        return pismeno
 
 
 class Legenda:
@@ -234,25 +260,45 @@ class Program:
 
         self.zasobnik = Zasobnik(400, 600, self.vrecko.vyber_pismena(7))
 
-        self.g.bind("<Button-1>", self.kliknutie)
+        self.g.bind("<Button-1>", self.udalost_kliknutie)
+        self.g.bind("<B1-Motion>", self.udalost_pohyb)
+        self.g.bind("<ButtonRelease-1>", self.udalost_uvolnenie)
 
         self.vykresli()
 
+        self.dragovane = None
+
         tkinter.mainloop()
-
-
-    
+   
     def vykresli(self):
         self.plocha.vykresli(self.g)
         self.legenda.vykresli(self.g)
         self.vrecko.vykresli(self.g)
         self.skore.vykresli(self.g)
         self.zasobnik.vykresli(self.g)
-                              
+                      
      
-    def kliknutie(self, event):
-        self.g.create_rectangle(200,200, 250, 220, outline = 'white', fill='white')
-        self.g.create_text(200, 200, text = str(event.x) + ',' + str(event.y), fill='red', anchor=tkinter.NW)
-      
+    def udalost_kliknutie(self, event):
+        print(self.zasobnik.je_klik(event.x, event.y))
+        print(self.zasobnik.aky_utvar(event.x, event.y))
+        print(event.x, event.y)
+        self.dragovane = self.zasobnik.aky_utvar(event.x, event.y)
+        #self.dragovane = {
+        #    'pismeno': self.zasobnik.aky_utvar(event.x, event.y),
+        #    'obrazok': tkinter.PhotoImage(file='A.png'),
+        #}
+
+    def udalost_pohyb(self, event):
+        if self.dragovane:
+            filename = 'obrazky/' + self.dragovane.pismeno.upper() + '.png'
+            self.obr = tkinter.PhotoImage(file=filename)
+            self.g.create_image(event.x, event.y, image=self.obr) #image=self.dragovane['obrazok'])
+
+    def udalost_uvolnenie(self, event):
+        if self.dragovane:
+            #self.na_ploche.append(self.dragovane['obrazok'])
+            
+            self.dragovane = None
+            self.obr = None
         
 t = Program()
